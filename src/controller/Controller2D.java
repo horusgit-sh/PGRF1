@@ -38,7 +38,14 @@ public class Controller2D {
                     startY = e.getY();
                     drawing = true;
                     polygonManager.addVertex(startX, startY);
-                } else {
+                }
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                if (e.getButton() != MouseEvent.BUTTON1) return;
+
+                if (drawing) {
                     int endX = e.getX();
                     int endY = e.getY();
 
@@ -53,8 +60,9 @@ public class Controller2D {
 
                     startX = endX;
                     startY = endY;
+
+                    panel.repaint();
                 }
-                panel.repaint();
             }
         });
 
