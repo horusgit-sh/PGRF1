@@ -1,8 +1,8 @@
 package rasterize;
 
+
 public abstract class LineRasterizer {
     protected RasterBufferedImage raster;
-    // TODO: vyřešit barvu.
 
     public LineRasterizer(RasterBufferedImage raster) {
         this.raster = raster;
