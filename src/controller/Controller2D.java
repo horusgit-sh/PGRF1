@@ -1,45 +1,55 @@
 package controller;
 
 
-import rasterise.LineRaserizerTrivial;
-import rasterise.LineRasterizer;
-import rasterise.LineRasterizerGraphics;
+import rasterize.LineRasterizer;
+import rasterize.LineRasterizerGraphics;
+import rasterize.LineRasterizerTrivial;
 import view.Panel;
 
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Controller2D {
     private final Panel panel;
-    private int color = 0xff0000;
+    private int color = 0xffffff;
 
     private LineRasterizer lineRasterizer;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
 
-        lineRasterizer = new LineRaserizerTrivial(panel.getRaster());
+        //lineRasterizer = new LineRasterizerGraphics(panel.getRaster());
+        lineRasterizer = new LineRasterizerTrivial(panel.getRaster());
+        panel.setFocusable(true);
+        panel.requestFocusInWindow();
 
         initListeners();
+
     }
 
     private void initListeners() {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                int cntrY = panel.getRaster().getVyska() / 2;
-                int cntrX = panel.getRaster().getSirska() / 2;
-                for (int x = cntrX; x < panel.getRaster().getSirska(); x++) {
-                    panel.getRaster().setPixel(x, cntrY, 0xff0000);
+                int centerX = panel.getRaster().getSirska() / 2;
+                int centerY = panel.getRaster().getVyska() / 2;
+
+                for (int x = centerX; x < panel.getRaster().getSirska(); x++) {
+                    panel.getRaster().setPixel(x, centerY, color);
                 }
+
                 panel.repaint();
             }
         });
 
-        panel.addMouseMotionListener(new MouseMotionAdapter() {
+        panel.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                int centerY = panel.getRaster().getVyska() / 2;
+                // vykresli úsečku z do
                 int centerX = panel.getRaster().getSirska() / 2;
+                int centerY = panel.getRaster().getVyska() / 2;
 
                 panel.getRaster().clear();
                 lineRasterizer.rasterize(centerX, centerY, e.getX(), e.getY());
@@ -50,19 +60,13 @@ public class Controller2D {
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_0) {
+                if(e.getKeyCode() == KeyEvent.VK_O) {
                     color = 0xff0000;
                 }
-                if (e.getKeyCode() == KeyEvent.VK_1) {
-                    color = 0x00ff00;
-                }
-            }
-        });
 
-        panel.addMouseMotionListener(new java.awt.event.MouseMotionAdapter() {
-            @Override
-            public void mouseMoved(MouseEvent e) {
-                panel.getRaster().setPixel(e.getX(), e.getY(), 0xff0000);
+                if(e.getKeyCode() == KeyEvent.VK_P) {
+                    color = 0xffffff;
+                }
             }
         });
     }

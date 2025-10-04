@@ -1,19 +1,18 @@
 package view;
 
-import rasterise.RasterBufferImage;
+import rasterize.RasterBufferedImage;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.image.BufferedImage;
 
 public class Panel extends JPanel {
 
-    private final RasterBufferImage raster;
+    private final RasterBufferedImage raster;
 
     public Panel(int width, int height) {
         setPreferredSize(new Dimension(width, height));
 
-        raster = new RasterBufferImage(width, height);
+        raster = new RasterBufferedImage(width, height);
     }
 
     @Override
@@ -22,7 +21,7 @@ public class Panel extends JPanel {
         g.drawImage(raster.getImage(), 0, 0, null);
     }
 
-    public RasterBufferImage getRaster() {
+    public RasterBufferedImage getRaster() {
         return raster;
     }
 }

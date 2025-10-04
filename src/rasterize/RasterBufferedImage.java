@@ -1,27 +1,25 @@
-package rasterise;
+package rasterize;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.nio.Buffer;
 
-public class RasterBufferImage implements Raster{
+public class RasterBufferedImage implements Raster {
 
-    private final BufferedImage image;
+    private BufferedImage image;
 
-    public RasterBufferImage(int width, int height) {
+    public RasterBufferedImage(int width, int height) {
         image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
     }
 
     @Override
     public void setPixel(int x, int y, int color) {
-        // osetrit zapis mimo rasteru
+        // TODO: ošetřit zápis mimo raster
         image.setRGB(x, y, color);
     }
 
     @Override
     public int getPixel(int x, int y) {
-
-        return 0;
+        return image.getRGB(x, y);
     }
 
     @Override
@@ -37,10 +35,8 @@ public class RasterBufferImage implements Raster{
     @Override
     public void clear() {
         Graphics g = image.getGraphics();
-        g.fillRect(0, 0, image.getWidth() , image.getHeight());
-
+        g.clearRect(0, 0, image.getWidth(), image.getHeight());
     }
-
 
     public BufferedImage getImage() {
         return image;
