@@ -4,19 +4,27 @@ import rasterize.FilledLineRasterizer;
 import rasterize.LineRasterizer;
 
 public class LineDrawer {
+
     private final LineRasterizer lineRasterizer;
+    private final int color1 = 0xFF0000;
+    private final int color2 = 0x0000FF;
 
     public LineDrawer(LineRasterizer lineRasterizer) {
         this.lineRasterizer = lineRasterizer;
     }
 
     public void drawLine(int x1, int y1, int x2, int y2, boolean gradientMode) {
-        if (gradientMode && lineRasterizer instanceof FilledLineRasterizer raster) {
-            raster.rasterize(x1, y1, x2, y2);
+        if (lineRasterizer instanceof FilledLineRasterizer raster) {
+            if (gradientMode) {
+                raster.rasterizeWithGradient(x1, y1, color1, x2, y2, color2);
+            } else {
+                raster.rasterize(x1, y1, x2, y2);
+            }
         } else {
             lineRasterizer.rasterize(x1, y1, x2, y2);
         }
     }
+
 
     public int[] getSnappedPoint(int startX, int startY, int endX, int endY) {
         int dx = endX - startX;

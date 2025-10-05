@@ -1,5 +1,6 @@
 package controller;
 
+import polygon.PolygonManager;
 import rasterize.FilledLineRasterizer;
 import rasterize.RasterBufferedImage;
 import view.Panel;
@@ -16,7 +17,9 @@ public class Controller2D {
     private boolean shiftPressed = false;
     private boolean gradientMode = false;
 
-    private int startX, startY;
+
+
+    private int startX, startY, endX, endY;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -46,8 +49,8 @@ public class Controller2D {
                 if (e.getButton() != MouseEvent.BUTTON1) return;
 
                 if (drawing) {
-                    int endX = e.getX();
-                    int endY = e.getY();
+                    endX = e.getX();
+                    endY = e.getY();
 
                     if (shiftPressed) {
                         int[] snapped = lineDrawer.getSnappedPoint(startX, startY, endX, endY);
@@ -72,7 +75,7 @@ public class Controller2D {
                 if (!drawing) return;
 
                 raster.clear();
-                polygonManager.drawPolygon();
+                polygonManager.drawPolygon(gradientMode);
 
                 int x = e.getX();
                 int y = e.getY();
@@ -104,12 +107,13 @@ public class Controller2D {
                 if (e.getKeyCode() == KeyEvent.VK_G) {
                     // Přepnutí režimu gradientu
                     gradientMode = !gradientMode;
+                    lineDrawer.drawLine(startX, startY, endX, endY, gradientMode);
                     panel.repaint();
                 }
 
                 // Uzavření polygonu - např. mezerník
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
-                    polygonManager.closePolygon();
+                    polygonManager.closePolygon(gradientMode);
                     panel.repaint();
                 }
             }
