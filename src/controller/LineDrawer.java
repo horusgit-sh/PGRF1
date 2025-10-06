@@ -37,13 +37,21 @@ public class LineDrawer {
         int newY = endY;
 
         if (angle >= 337.5 || angle < 22.5) newY = startY;          // horizontal right
-        else if (angle < 67.5) { newX = startX + dist; newY = startY + dist; }
+        else if (angle < 67.5) {
+            newX = startX + dist; newY = startY + dist;
+        }
         else if (angle < 112.5) newX = startX;                      // vertical up
-        else if (angle < 157.5) { newX = startX - dist; newY = startY + dist; }
+        else if (angle < 157.5) {
+            newX = startX - dist; newY = startY + dist;
+        }
         else if (angle < 202.5) newY = startY;                      // horizontal left
-        else if (angle < 247.5) { newX = startX - dist; newY = startY - dist; }
+        else if (angle < 247.5) {
+            newX = startX - dist; newY = startY - dist;
+        }
         else if (angle < 292.5) newX = startX;                      // vertical down
-        else { newX = startX + dist; newY = startY - dist; }        // diagonal ↘
+        else {
+            newX = startX + dist; newY = startY - dist;
+        }        // diagonal
 
         return new int[]{newX, newY};
     }

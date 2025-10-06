@@ -16,9 +16,6 @@ public class Controller2D {
     private boolean drawing = false;
     private boolean shiftPressed = false;
     private boolean gradientMode = false;
-
-
-
     private int startX, startY, endX, endY;
 
     public Controller2D(Panel panel) {
