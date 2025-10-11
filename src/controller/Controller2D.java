@@ -1,6 +1,7 @@
+// Controller2D - ovlada interakci uzivatele s platnem (mys, klavesnice)
 package controller;
 
-import polygon.PolygonManager;
+import polygon.PolygonRasterize;
 import rasterize.FilledLineRasterizer;
 import rasterize.RasterBufferedImage;
 import view.Panel;
@@ -8,10 +9,14 @@ import view.Panel;
 import java.awt.event.*;
 
 public class Controller2D {
+    // Odkaz na vykreslovaci panel
     private final Panel panel;
+    // Raster pro kresleni pixelu
     private final RasterBufferedImage raster;
+    // Objekt pro kresleni usecek
     private final LineDrawer lineDrawer;
-    private final PolygonManager polygonManager;
+    // Spravce polygonu
+    private final PolygonRasterize polygonManager;
 
     private boolean drawing = false;
     private boolean shiftPressed = false;
@@ -22,17 +27,18 @@ public class Controller2D {
         this.panel = panel;
         this.raster = panel.getRaster();
         this.lineDrawer = new LineDrawer(new FilledLineRasterizer(raster));
-        this.polygonManager = new PolygonManager(raster, lineDrawer);
+        this.polygonManager = new PolygonRasterize(raster, lineDrawer);
 
         initListeners();
     }
 
+    // Inicializace posluchacu udalosti mysi a klavesnice
     private void initListeners() {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
                 if (e.getButton() != MouseEvent.BUTTON1) return;
-
+                // Zacatek kresleni pri stisku leveho tlacitka
                 if (!drawing) {
                     startX = e.getX();
                     startY = e.getY();
@@ -44,11 +50,12 @@ public class Controller2D {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (e.getButton() != MouseEvent.BUTTON1) return;
-
+                // Dokonceni usecky po uvolneni tlacitka mysi
                 if (drawing) {
                     endX = e.getX();
                     endY = e.getY();
 
+                    // Pokud je stisknut SHIFT, zarovnat na vodorovnou/svislou/uhlopricnou linii
                     if (shiftPressed) {
                         int[] snapped = lineDrawer.getSnappedPoint(startX, startY, endX, endY);
                         endX = snapped[0];
@@ -76,6 +83,7 @@ public class Controller2D {
 
                 int x = e.getX();
                 int y = e.getY();
+                // Pokud je stisknut SHIFT, zarovnat na vodorovnou/svislou/uhlopricnou linii
                 if (shiftPressed) {
                     int[] snapped = lineDrawer.getSnappedPoint(startX, startY, x, y);
                     x = snapped[0];
@@ -96,19 +104,19 @@ public class Controller2D {
                 }
 
                 if (e.getKeyCode() == KeyEvent.VK_C) {
-                    // Smazat plátno - Uloha1 požadavek
+                    // Smazat plátno
                     polygonManager.clearCanvas();
                     panel.repaint();
                 }
 
+                // Prepina rezim barevneho prechodu (gradient)
                 if (e.getKeyCode() == KeyEvent.VK_G) {
-                    // Přepnutí režimu gradientu
                     gradientMode = !gradientMode;
                     lineDrawer.drawLine(startX, startY, endX, endY, gradientMode);
                     panel.repaint();
                 }
 
-                // Uzavření polygonu - např. mezerník
+                // Uzavre polygon mezernikem
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     polygonManager.closePolygon(gradientMode);
                     panel.repaint();

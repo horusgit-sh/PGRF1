@@ -3,16 +3,22 @@ package controller;
 import rasterize.FilledLineRasterizer;
 import rasterize.LineRasterizer;
 
+// Trida pro kresleni usecek, podporuje i barevny prechod (gradient)
 public class LineDrawer {
 
+    // Konkretni rasterizator usecek
     private final LineRasterizer lineRasterizer;
+    // Zacatecni barva pro gradient
     private final int color1 = 0xFF0000;
+    // Koncova barva pro gradient
     private final int color2 = 0x0000FF;
 
+    // Konstruktor - prijima rasterizator usecek
     public LineDrawer(LineRasterizer lineRasterizer) {
         this.lineRasterizer = lineRasterizer;
     }
 
+    // Vykresli usecku, podle rezimu bud normalne nebo s barevnym prechodem
     public void drawLine(int x1, int y1, int x2, int y2, boolean gradientMode) {
         if (lineRasterizer instanceof FilledLineRasterizer raster) {
             if (gradientMode) {
@@ -26,6 +32,7 @@ public class LineDrawer {
     }
 
 
+    // Vrati koncovy bod zarovnany na horizontalni, svislou nebo uhlopricnou linii (SHIFT rezim)
     public int[] getSnappedPoint(int startX, int startY, int endX, int endY) {
         int dx = endX - startX;
         int dy = endY - startY;

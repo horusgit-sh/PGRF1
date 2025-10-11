@@ -6,6 +6,8 @@ package rasterize;
  * Algoritmus: Bresenhamův algoritmus pro rasterizaci úseček
  * Princip: Používá pouze celočíselnou aritmetiku pro výpočet pixel
  * Paměťová složitost: O(1)
+ * + Výhody: velmi rychlý, používá pouze celočíselné operace, nízká paměťová náročnost
+ * - Nevýhody: hůře rozšiřitelný pro křivky, složitější implementace pro antialiasing
  */
 public class FilledLineRasterizer extends LineRasterizer {
 
@@ -34,6 +36,7 @@ public class FilledLineRasterizer extends LineRasterizer {
                 break; //
             }
 
+            // Vypocet chyby a posun v ose X a/nebo Y podle Bresenhamova algoritmu
             int e2 = 2 * err;
 
             if (e2 > -dy) {
@@ -93,6 +96,7 @@ public class FilledLineRasterizer extends LineRasterizer {
             // Ukončení při dosažení koncového bodu
             if (x == x2 && y == y2) break;
 
+            // Vypocet chyby a posun v ose X a/nebo Y podle Bresenhamova algoritmu
             e2 = 2 * err;
 
             if (e2 > -dy) {

@@ -1,22 +1,29 @@
+// Trida pro spravu a vykresleni polygonu
 package polygon;
 
 import controller.LineDrawer;
 import rasterize.RasterBufferedImage;
 
-public class PolygonManager {
+public class PolygonRasterize {
+    // Raster pro kresleni
     private final RasterBufferedImage raster;
+    // Nastroj pro kresleni usecek
     private final LineDrawer lineDrawer;
+    // Ulozene vrcholy polygonu
     private final Polygon polygon = new Polygon();
 
-    public PolygonManager(RasterBufferedImage raster, LineDrawer lineDrawer) {
+    // Konstruktor - prijima raster a kreslic usecek
+    public PolygonRasterize(RasterBufferedImage raster, LineDrawer lineDrawer) {
         this.raster = raster;
         this.lineDrawer = lineDrawer;
     }
 
+    // Prida novy vrchol polygonu
     public void addVertex(int x, int y) {
         polygon.addVertex(new Point(x, y));
     }
 
+    // Vykresli otevreny polygon (spoji vrcholy postupne)
     public void drawPolygon(boolean gradientMode) {
         if (polygon.size() < 2) return;
         for (int i = 0; i < polygon.size() - 1; i++) {
@@ -26,6 +33,7 @@ public class PolygonManager {
         }
     }
 
+    // Uzavre polygon spojenim posledniho a prvniho vrcholu
     public void closePolygon(boolean gradientMode) {
         if (polygon.size() > 2) {
             lineDrawer.drawLine(polygon.getLast().x, polygon.getLast().y,
@@ -35,6 +43,7 @@ public class PolygonManager {
         }
     }
 
+    // Smaze platno i data polygonu
     public void clearCanvas() {
         raster.clear();
         polygon.clear();
