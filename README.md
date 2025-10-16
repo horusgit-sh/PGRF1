@@ -1,7 +1,7 @@
 
 # Interaktivní kreslení úseček a polygonů
 
-Tento projekt je semestrální úloha z předmětu **PGRF1**. Cílem je vytvořit aplikaci pro interaktivní kreslení úseček a n-úhelníků pomocí rasterizace.
+Tento projekt je úloha 1 z předmětu **PGRF1**. 
 
 ## Funkce aplikace
 - Interaktivní zadávání bodů myší
@@ -21,6 +21,3 @@ Tento projekt je semestrální úloha z předmětu **PGRF1**. Cílem je vytvoři
 Projekt lze spustit v prostředí **Java 17+**:
 1. Zkompilujte projekt
 2. Spusťte třídu `Main`
-
-## Poznámka
-Kód je rozdělen do tříd a obsahuje jednoduché komentáře v češtině pro lepší čitelnost.

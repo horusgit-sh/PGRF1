@@ -1,5 +1,7 @@
 package rasterize;
 
+import java.awt.*;
+
 /**
  * Implementace rasterizace úsečky pomocí Bresenhamova algoritmu.
  *
@@ -53,14 +55,17 @@ public class FilledLineRasterizer extends LineRasterizer {
 
     @Override
     public void rasterizeWithGradient(int x1, int y1, int color1, int x2, int y2, int color2) {
-        // Rozložení barev na RGB komponenty
-        int r1 = (color1 >> 16) & 0xFF;
-        int g1 = (color1 >> 8) & 0xFF;
-        int b1 = color1 & 0xFF;
 
-        int r2 = (color2 >> 16) & 0xFF;
-        int g2 = (color2 >> 8) & 0xFF;
-        int b2 = color2 & 0xFF;
+        Color cStart = new Color(color1);
+        Color cEnd = new Color(color2);
+
+        int r1 = cStart.getRed();
+        int g1 = cStart.getGreen();
+        int b1 = cStart.getBlue();
+
+        int r2 = cEnd.getRed();
+        int g2 = cEnd.getGreen();
+        int b2 = cEnd.getBlue();
 
         int dx = Math.abs(x2 - x1);
         int dy = Math.abs(y2 - y1);
