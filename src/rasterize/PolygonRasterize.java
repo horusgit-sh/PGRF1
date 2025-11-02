@@ -1,8 +1,9 @@
 // Trida pro spravu a vykresleni polygonu
-package polygon;
+package rasterize;
 
 import controller.LineDrawer;
-import rasterize.RasterBufferedImage;
+import model.Point;
+import model.Polygon;
 
 public class PolygonRasterize {
     // Raster pro kresleni

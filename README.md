@@ -13,7 +13,7 @@ Tento projekt je úloha 1 z předmětu **PGRF1**.
 
 ## Struktura projektu
 - `rasterize/` – práce s rastrem a rasterizace úseček
-- `polygon/` – ukládání a vykreslování polygonů
+- `model/` – ukládání a vykreslování polygonů
 - `controller/` – uživatelská interakce (myš a klávesnice)
 - `view/` – vykreslovací panel a okno aplikace
 

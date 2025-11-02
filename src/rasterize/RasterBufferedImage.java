@@ -35,6 +35,11 @@ public class RasterBufferedImage implements Raster {
         return image.getHeight();
     }
 
+    @Override
+    public int getPixel(int x, int y) {
+        return image.getRGB(x, y);
+    }
+
     // Smaze obsah rasteru (vycisti platno)
     @Override
     public void clear() {
