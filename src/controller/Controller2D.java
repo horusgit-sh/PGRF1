@@ -39,8 +39,13 @@ public class Controller2D {
     private final java.util.List<Point> currentPoly = new java.util.ArrayList<>();
     private final java.util.List<Polygon> finishedPolys = new java.util.ArrayList<>();
     private java.util.List<Point> clipWindow = java.util.Arrays.asList(
-        new Point(200,100), new Point(300,150), new Point(350,250), new Point(250,300), new Point(150,200)
+            new Point(200,100),
+            new Point(300,150),
+            new Point(350,250),
+            new Point(250,300),
+            new Point(150,200)
     );
+    private boolean areaSelectMode=false;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -56,6 +61,33 @@ public class Controller2D {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                if(areaSelectMode){
+                    java.util.List<Polygon> hit=new java.util.ArrayList<>();
+                    Point click=new Point(e.getX(),e.getY());
+                    for(Polygon p:finishedPolys){ if(isPointInside(click,p)) hit.add(p);}
+                    if(hit.size()>0){
+                        Polygon inter=hit.get(0);
+                        for(int i=1;i<hit.size();i++){
+                            inter=clipper.clip(inter,hit.get(i));
+                            if(inter==null){
+                                // no intersection area
+                                areaSelectMode=false;
+                                panel.repaint();
+                                return;
+                            }
+                        }
+                        finishedPolys.clear(); finishedPolys.add(inter);
+                        areaSelectMode=false;
+                        raster.clear();
+                        for(int i=0;i<inter.getVertices().size();i++){
+                            Point a=inter.getVertices().get(i);
+                            Point b=inter.getVertices().get((i+1)%inter.getVertices().size());
+                            lineDrawer.drawLine(a.x,a.y,b.x,b.y,gradientMode);
+                        }
+                        panel.repaint();
+                        return;
+                    }
+                }
                 if(seedBG||seedBND){
                     if(seedBG) seedFiller.fill(e.getX(),e.getY(),raster,0x00FF00);
                     else seedFiller.fill(e.getX(),e.getY(),raster,0xFF0000);
@@ -165,42 +197,29 @@ public class Controller2D {
 
                 if(e.getKeyCode()==KeyEvent.VK_F){
                     seedBG=true;seedBND=false;
+                    drawing=false;
                 }
                 if(e.getKeyCode()==KeyEvent.VK_B){
                     seedBG=false;seedBND=true;
+                    drawing=false;
                 }
                 if(e.getKeyCode()==KeyEvent.VK_R){
-                    rectMode=true;rectAwaitHeight=false;rA=rB=null;
+                    rectMode=true;rectAwaitHeight=false;
+                    rA=rB=null;
+                    drawing=false;
                 }
                 if(e.getKeyCode()==KeyEvent.VK_V){
-                    if(currentPoly.size()>=3){
-                        Polygon subject = new Polygon();
-                        for(Point p : currentPoly) subject.addVertex(p);
-                        Polygon window = new Polygon();
-                        for(Point p : clipWindow) window.addVertex(p);
-                        Polygon clippedPoly = clipper.clip(subject, window);
-                        if(clippedPoly!=null){
-                            raster.clear();
-                            for(int i=0;i<clippedPoly.getVertices().size();i++){
-                                Point a = clippedPoly.getVertices().get(i);
-                                Point b = clippedPoly.getVertices().get((i+1)%clippedPoly.getVertices().size());
-                                lineDrawer.drawLine(a.x,a.y,b.x,b.y,gradientMode);
-                            }
-                            scanFiller.fill(clippedPoly,raster,0x00FF00);
-                            panel.repaint();
-                        }
-                    }
+                    drawing=false;
+                    areaSelectMode=true;
+                    return;
                 }
                 if(e.getKeyCode()==KeyEvent.VK_C){
                     currentPoly.clear();
                     finishedPolys.clear();
-                }
-
-                if (e.getKeyCode() == KeyEvent.VK_C) {
-                    // Smazat plátno
                     polygonManager.clearCanvas();
                     panel.repaint();
                 }
+
 
                 // Prepina rezim barevneho prechodu (gradient)
                 if (e.getKeyCode() == KeyEvent.VK_G) {
@@ -217,13 +236,21 @@ public class Controller2D {
                     finishedPolys.add(saved);
                     currentPoly.clear();
                     panel.repaint();
+                    drawing = false;
                 }
             }
 
-            @Override
-            public void keyReleased(KeyEvent e) {
-                if (e.getKeyCode() == KeyEvent.VK_SHIFT) shiftPressed = false;
-            }
         });
+    }
+    private boolean isPointInside(Point p, Polygon poly){
+        if(poly==null) return false;
+        boolean res=false;
+        for(int i=0,j=poly.getVertices().size()-1;i<poly.getVertices().size();j=i++){
+            int xi=poly.getVertices().get(i).x, yi=poly.getVertices().get(i).y;
+            int xj=poly.getVertices().get(j).x, yj=poly.getVertices().get(j).y;
+            if(((yi>p.y)!=(yj>p.y)) && (p.x<(xj-xi)*(p.y-yi)/(double)(yj-yi+0.00001)+xi))
+                res=!res;
+        }
+        return res;
     }
 }
