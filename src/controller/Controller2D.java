@@ -11,6 +11,7 @@ import model.Point;
 import fill.SeedFiller;
 import clipper.Clipper;
 
+import java.awt.*;
 import java.awt.event.*;
 
 public class Controller2D {
@@ -25,7 +26,9 @@ public class Controller2D {
 
     private boolean drawing = false;
     private boolean gradientMode = false;
-    private boolean rectMode=false;
+    private boolean rectMode = false;
+    private int rectStep = 0;
+    private Point rectA, rectB;
     private int startX, startY, endX, endY;
 
     private final Clipper clipper = new Clipper();
@@ -48,14 +51,52 @@ public class Controller2D {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // simple fill modes
+
                 if(seedBG || seedBND){
                     int x=e.getX(), y=e.getY();
-                    if(seedBG) seedFiller.fill(x,y,raster,0x00FF00);
-                    if(seedBND) seedFiller.fill(x,y,raster,0xFF0000);
+                    if(seedBG) {
+                        seedFiller.fill(x,y,raster,0x00FF00);
+                        seedBG=false;
+                    }
+                    if(seedBND) {
+                        seedFiller.fillBoundary(x, y, raster, 0xFFFFFF, 0xFF0000);
+                        seedBND=false;
+                    }
                     panel.repaint();
                     return;
                 }
+
+                if(rectMode){
+                    if(rectStep==0){ rectA=new Point(e.getX(),e.getY()); rectStep=1; return; }
+                    if(rectStep==1){ rectB=new Point(e.getX(),e.getY()); rectStep=2; return; }
+                    if(rectStep==2){
+                        Point p3=new Point(e.getX(),e.getY());
+                        double vx = rectB.x-rectA.x;
+                        double vy = rectB.y-rectA.y;
+                        double nx = -vy;
+                        double ny = vx;
+                        double len = Math.hypot(nx,ny);
+                        nx/=len;
+                        ny/=len;
+                        double h = ( (p3.x-rectA.x)*nx + (p3.y-rectA.y)*ny );
+                        Point p4 = new Point((int)Math.round(rectB.x+nx*h),(int)Math.round(rectB.y+ny*h));
+                        Point p3p= new Point((int)Math.round(rectA.x+nx*h),(int)Math.round(rectA.y+ny*h));
+                        Polygon r=new Polygon();
+                        r.addVertex(rectA); r.addVertex(rectB); r.addVertex(p4); r.addVertex(p3p);
+                        finishedPolys.add(r);
+                        rectMode=false; rectStep=0;
+                        raster.clear();
+                        for(Polygon fp:finishedPolys){
+                            for(int i=0;i<fp.getVertices().size();i++){
+                                Point a=fp.getVertices().get(i);
+                                Point b=fp.getVertices().get((i+1)%fp.getVertices().size());
+                                lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                            }
+                        }
+                        panel.repaint(); return;
+                    }
+                }
+
                 if (e.getButton() != MouseEvent.BUTTON1) return;
                 // Zacatek kresleni pri stisku leveho tlacitka
                 if (!drawing) {
