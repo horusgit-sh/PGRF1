@@ -20,10 +20,10 @@ public class Rectangle extends Polygon {
 
         // kolmá normála
         double nx = -by;
-        double ny =  bx;
+        double ny = bx;
 
         // normalizace
-        double len = Math.sqrt(nx*nx + ny*ny);
+        double len = Math.sqrt(nx * nx + ny * ny);
         if (len == 0) return;
 
         nx /= len;
@@ -33,8 +33,8 @@ public class Rectangle extends Polygon {
         double h = (p3.x - p1.x) * nx + (p3.y - p1.y) * ny;
 
         // dva zbývající body
-        Point p4 = new Point((int)(p1.x + nx*h), (int)(p1.y + ny*h));
-        Point p5 = new Point((int)(p2.x + nx*h), (int)(p2.y + ny*h));
+        Point p4 = new Point((int) (p1.x + nx * h), (int) (p1.y + ny * h));
+        Point p5 = new Point((int) (p2.x + nx * h), (int) (p2.y + ny * h));
 
         // Uložit 4 body obdélníku
         addVertex(p1);

@@ -2,6 +2,7 @@ package clipper;
 
 import model.Point;
 import model.Polygon;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,15 +52,15 @@ public class Clipper {
         return ((B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)) >= 0;
     }
 
-    public boolean isPointInside(model.Point p, Polygon poly){
-        if(poly==null || poly.getVertices()==null || poly.getVertices().size()<3) return false;
-        boolean res=false;
+    public boolean isPointInside(model.Point p, Polygon poly) {
+        if (poly == null || poly.getVertices() == null || poly.getVertices().size() < 3) return false;
+        boolean res = false;
         java.util.List<model.Point> v = poly.getVertices();
-        for(int i=0,j=v.size()-1;i<v.size();j=i++){
-            int xi=v.get(i).x, yi=v.get(i).y;
-            int xj=v.get(j).x, yj=v.get(j).y;
-            boolean intersect = ((yi>p.y) != (yj>p.y)) && (p.x < (long)(xj - xi) * (p.y - yi) / (double)(yj - yi + (yj==yi?1:0)) + xi);
-            if(intersect) res = !res;
+        for (int i = 0, j = v.size() - 1; i < v.size(); j = i++) {
+            int xi = v.get(i).x, yi = v.get(i).y;
+            int xj = v.get(j).x, yj = v.get(j).y;
+            boolean intersect = ((yi > p.y) != (yj > p.y)) && (p.x < (long) (xj - xi) * (p.y - yi) / (double) (yj - yi + (yj == yi ? 1 : 0)) + xi);
+            if (intersect) res = !res;
         }
         return res;
     }
@@ -71,6 +72,6 @@ public class Clipper {
         double denom = dy2 * dx1 - dx2 * dy1;
         if (Math.abs(denom) < 1e-10) return S;
         double t = (dx2 * dy3 - dy2 * dx3) / denom;
-        return new Point((int)Math.round(S.x + t * dx1), (int)Math.round(S.y + t * dy1));
+        return new Point((int) Math.round(S.x + t * dx1), (int) Math.round(S.y + t * dy1));
     }
 }

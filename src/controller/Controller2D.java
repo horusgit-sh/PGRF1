@@ -1,17 +1,22 @@
 package controller;
 
+import clipper.Clipper;
+import fill.BoardPattern;
+import fill.PatternFill;
+import fill.ScanLineFiller;
+import fill.SeedFiller;
+import model.Point;
 import model.Polygon;
-import rasterize.PolygonRasterize;
 import rasterize.FilledLineRasterizer;
+import rasterize.PolygonRasterize;
 import rasterize.RasterBufferedImage;
 import view.Panel;
 
-import model.Point;
-import fill.SeedFiller;
-import clipper.Clipper;
-
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class Controller2D {
     // Odkaz na vykreslovaci panel
@@ -33,10 +38,13 @@ public class Controller2D {
     private final Clipper clipper = new Clipper();
     private final java.util.List<Point> currentPoly = new java.util.ArrayList<>();
     private final java.util.List<Polygon> finishedPolys = new java.util.ArrayList<>();
-    private boolean seedBG=false, seedBND=false;
+    private boolean seedBG = false, seedBND = false;
     private final SeedFiller seedFiller = new SeedFiller();
+    private ScanLineFiller scanLineFiller = new ScanLineFiller();
+    private final PatternFill board = new BoardPattern(6, 0xFFFFFFFF, 0xFF000000);
     private boolean clipMode = false;
     private Polygon clipWindow = null;
+    private boolean boardMode = false;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -53,15 +61,15 @@ public class Controller2D {
             @Override
             public void mousePressed(MouseEvent e) {
                 // If we are in clip mode: click triggers clipping of all finished polygons by the blue pentagon
-                if(clipMode){
+                if (clipMode) {
                     int cx = e.getX(), cy = e.getY();
-                    model.Point clickP = new model.Point(cx,cy);
+                    model.Point clickP = new model.Point(cx, cy);
                     // proceed only if click lies inside the pentagon
-                    if(clipWindow!=null && clipper.isPointInside(clickP, clipWindow)){
+                    if (clipWindow != null && clipper.isPointInside(clickP, clipWindow)) {
                         java.util.List<Polygon> clippedList = new java.util.ArrayList<>();
-                        for(Polygon fp : finishedPolys){
+                        for (Polygon fp : finishedPolys) {
                             Polygon cp = clipper.clip(fp, clipWindow);
-                            if(cp != null && cp.getVertices()!=null && cp.getVertices().size()>=3){
+                            if (cp != null && cp.getVertices() != null && cp.getVertices().size() >= 3) {
                                 clippedList.add(cp);
                             }
                         }
@@ -69,83 +77,106 @@ public class Controller2D {
                         finishedPolys.addAll(clippedList);
                         // clear, redraw results
                         raster.clear();
-                        for(Polygon fp: finishedPolys){
+                        for (Polygon fp : finishedPolys) {
                             java.util.List<model.Point> vs = fp.getVertices();
-                            for(int i=0;i<vs.size();i++){
+                            for (int i = 0; i < vs.size(); i++) {
                                 model.Point a = vs.get(i);
-                                model.Point b = vs.get((i+1)%vs.size());
-                                lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                                model.Point b = vs.get((i + 1) % vs.size());
+                                lineDrawer.drawLine(a.x, a.y, b.x, b.y, false);
                             }
                         }
                         panel.repaint();
+                        // auto fill clipped result
+                        if (!finishedPolys.isEmpty()) {
+                            if (boardMode) {
+                                scanLineFiller.fill(finishedPolys.get(0), raster, board);
+                                panel.repaint();
+                                boardMode = false;
+                            } else {
+                                scanLineFiller.fill(finishedPolys.get(0), raster, 0x00FF00);
+                                panel.repaint();
+                            }
+                        }
                         // exit clip mode and hide window
-                        clipMode=false;
-                        clipWindow=null;
+                        clipMode = false;
+                        clipWindow = null;
                         return;
                     }
                     // if clicked outside pentagon, ignore for clipping
                 }
 
-                if(seedBG || seedBND){
-                    int x=e.getX(), y=e.getY();
-                    if(seedBG) {
-                        seedFiller.fill(x,y,raster,0x00FF00);
-                        seedBG=false;
+                if (seedBG || seedBND) {
+                    int x = e.getX(), y = e.getY();
+                    if (seedBG) {
+                        seedFiller.fill(x, y, raster, 0x00FF00);
+                        seedBG = false;
                     }
-                   if(seedBND) {
-                       final int BOUNDARY_COLOR = 0xFFFFFFFF;
+                    if (seedBND) {
+                        final int BOUNDARY_COLOR = 0xFFFFFFFF;
 
-                       Color oldColor = lineDrawer.getColor();
-                       lineDrawer.setColor(new Color(0xFFFFFFFF, true));
+                        Color oldColor = lineDrawer.getColor();
+                        lineDrawer.setColor(new Color(0xFFFFFFFF, true));
 
-                       for(Polygon poly : finishedPolys){
-                           for(int i=0;i<poly.getVertices().size();i++){
-                               Point a=poly.getVertices().get(i);
-                               Point b=poly.getVertices().get((i+1)%poly.getVertices().size());
-                               lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
-                           }
-                       }
+                        for (Polygon poly : finishedPolys) {
+                            for (int i = 0; i < poly.getVertices().size(); i++) {
+                                Point a = poly.getVertices().get(i);
+                                Point b = poly.getVertices().get((i + 1) % poly.getVertices().size());
+                                lineDrawer.drawLine(a.x, a.y, b.x, b.y, false);
+                            }
+                        }
 
-                       lineDrawer.setColor(oldColor);
+                        lineDrawer.setColor(oldColor);
 
-                       seedFiller.fillBoundary(x, y, raster,0xFFFF0000, BOUNDARY_COLOR);
-                       seedBND=false;
-                       panel.repaint();
-                       return;
-                   }
+                        seedFiller.fillBoundary(x, y, raster, 0xFFFF0000, BOUNDARY_COLOR);
+                        seedBND = false;
+                        panel.repaint();
+                        return;
+                    }
                     panel.repaint();
                     return;
                 }
 
-                if(rectMode){
-                    if(rectStep==0){ rectA=new Point(e.getX(),e.getY()); rectStep=1; return; }
-                    if(rectStep==1){ rectB=new Point(e.getX(),e.getY()); rectStep=2; return; }
-                    if(rectStep==2){
-                        Point p3=new Point(e.getX(),e.getY());
-                        double vx = rectB.x-rectA.x;
-                        double vy = rectB.y-rectA.y;
+                if (rectMode) {
+                    if (rectStep == 0) {
+                        rectA = new Point(e.getX(), e.getY());
+                        rectStep = 1;
+                        return;
+                    }
+                    if (rectStep == 1) {
+                        rectB = new Point(e.getX(), e.getY());
+                        rectStep = 2;
+                        return;
+                    }
+                    if (rectStep == 2) {
+                        Point p3 = new Point(e.getX(), e.getY());
+                        double vx = rectB.x - rectA.x;
+                        double vy = rectB.y - rectA.y;
                         double nx = -vy;
                         double ny = vx;
-                        double len = Math.hypot(nx,ny);
-                        nx/=len;
-                        ny/=len;
-                        double h = ( (p3.x-rectA.x)*nx + (p3.y-rectA.y)*ny );
-                        Point p4 = new Point((int)Math.round(rectB.x+nx*h),(int)Math.round(rectB.y+ny*h));
-                        Point p3p= new Point((int)Math.round(rectA.x+nx*h),(int)Math.round(rectA.y+ny*h));
-                        Polygon r=new Polygon();
-                        r.addVertex(rectA); r.addVertex(rectB); r.addVertex(p4); r.addVertex(p3p);
+                        double len = Math.hypot(nx, ny);
+                        nx /= len;
+                        ny /= len;
+                        double h = ((p3.x - rectA.x) * nx + (p3.y - rectA.y) * ny);
+                        Point p4 = new Point((int) Math.round(rectB.x + nx * h), (int) Math.round(rectB.y + ny * h));
+                        Point p3p = new Point((int) Math.round(rectA.x + nx * h), (int) Math.round(rectA.y + ny * h));
+                        Polygon r = new Polygon();
+                        r.addVertex(rectA);
+                        r.addVertex(rectB);
+                        r.addVertex(p4);
+                        r.addVertex(p3p);
                         finishedPolys.add(r);
-                        rectMode=false;
-                        rectStep=0;
+                        rectMode = false;
+                        rectStep = 0;
                         raster.clear();
-                        for(Polygon fp:finishedPolys){
-                            for(int i=0;i<fp.getVertices().size();i++){
-                                Point a=fp.getVertices().get(i);
-                                Point b=fp.getVertices().get((i+1)%fp.getVertices().size());
-                                lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                        for (Polygon fp : finishedPolys) {
+                            for (int i = 0; i < fp.getVertices().size(); i++) {
+                                Point a = fp.getVertices().get(i);
+                                Point b = fp.getVertices().get((i + 1) % fp.getVertices().size());
+                                lineDrawer.drawLine(a.x, a.y, b.x, b.y, false);
                             }
                         }
-                        panel.repaint(); return;
+                        panel.repaint();
+                        return;
                     }
                 }
 
@@ -156,7 +187,7 @@ public class Controller2D {
                     startY = e.getY();
                     drawing = true;
                     polygonManager.addVertex(startX, startY);
-                    currentPoly.add(new Point(startX,startY));
+                    currentPoly.add(new Point(startX, startY));
                 }
             }
 
@@ -170,7 +201,7 @@ public class Controller2D {
 
                     lineDrawer.drawLine(startX, startY, endX, endY, gradientMode);
                     polygonManager.addVertex(endX, endY);
-                    currentPoly.add(new Point(endX,endY));
+                    currentPoly.add(new Point(endX, endY));
 
                     startX = endX;
                     startY = endY;
@@ -187,11 +218,11 @@ public class Controller2D {
 
                 raster.clear();
                 // Redraw finished polygons
-                for(Polygon fp : finishedPolys){
-                    for(int i=0;i<fp.getVertices().size();i++){
-                        Point a=fp.getVertices().get(i);
-                        Point b=fp.getVertices().get((i+1)%fp.getVertices().size());
-                        lineDrawer.drawLine(a.x,a.y,b.x,b.y,gradientMode);
+                for (Polygon fp : finishedPolys) {
+                    for (int i = 0; i < fp.getVertices().size(); i++) {
+                        Point a = fp.getVertices().get(i);
+                        Point b = fp.getVertices().get((i + 1) % fp.getVertices().size());
+                        lineDrawer.drawLine(a.x, a.y, b.x, b.y, gradientMode);
                     }
                 }
                 polygonManager.drawPolygon(gradientMode);
@@ -207,8 +238,11 @@ public class Controller2D {
         panel.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
-                if(e.getKeyCode()==KeyEvent.VK_V){
-                    drawing=false; seedBG=false; seedBND=false; rectMode=false;
+                if (e.getKeyCode() == KeyEvent.VK_V) {
+                    drawing = false;
+                    seedBG = false;
+                    seedBND = false;
+                    rectMode = false;
                     clipMode = true;
                     // build centered blue pentagon as clipping window
                     clipWindow = makeDefaultClipWindow();
@@ -216,16 +250,16 @@ public class Controller2D {
                     Color __old = lineDrawer.getColor();
                     lineDrawer.setColor(new Color(0xFF0000FF, true));
                     java.util.List<model.Point> pts = clipWindow.getVertices();
-                    for(int i=0;i<pts.size();i++){
+                    for (int i = 0; i < pts.size(); i++) {
                         model.Point a = pts.get(i);
-                        model.Point b = pts.get((i+1)%pts.size());
-                        lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                        model.Point b = pts.get((i + 1) % pts.size());
+                        lineDrawer.drawLine(a.x, a.y, b.x, b.y, false);
                     }
                     lineDrawer.setColor(__old);
                     panel.repaint();
                     return;
                 }
-                if(e.getKeyCode()==KeyEvent.VK_C){
+                if (e.getKeyCode() == KeyEvent.VK_C) {
                     currentPoly.clear();
                     finishedPolys.clear();
                     polygonManager.clearCanvas();
@@ -236,7 +270,7 @@ public class Controller2D {
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     polygonManager.closePolygon(gradientMode);
                     Polygon saved = new Polygon();
-                    for(Point p : currentPoly) saved.addVertex(p);
+                    for (Point p : currentPoly) saved.addVertex(p);
                     finishedPolys.add(saved);
                     currentPoly.clear();
                     panel.repaint();
@@ -244,32 +278,51 @@ public class Controller2D {
                 }
 
                 // enable boundary fill
-                if(e.getKeyCode()==KeyEvent.VK_B){ seedBG=false; seedBND=true; drawing=false;}
+                if (e.getKeyCode() == KeyEvent.VK_B) {
+                    seedBG = false;
+                    seedBND = true;
+                    drawing = false;
+                    boardMode = false;
+                }
                 // enable background fill
-                if(e.getKeyCode()==KeyEvent.VK_F){ seedBG=true; seedBND=false; drawing=false; }
+                if (e.getKeyCode() == KeyEvent.VK_F) {
+                    seedBG = true;
+                    seedBND = false;
+                    drawing = false;
+                    boardMode = false;
+                }
                 // enable rectangle mode
-                if(e.getKeyCode()==KeyEvent.VK_R){
-                    drawing=false;
-                    seedBG=false;
-                    seedBND=false;
-                    rectMode=true;
+                if (e.getKeyCode() == KeyEvent.VK_R) {
+                    drawing = false;
+                    seedBG = false;
+                    seedBND = false;
+                    rectMode = true;
+                    boardMode = false;
+                }
+                if (e.getKeyCode() == KeyEvent.VK_P) {
+                    drawing = false;
+                    seedBG = false;
+                    seedBND = false;
+                    rectMode = false;
+                    boardMode = true;
                 }
             }
 
         });
     }
 
-    private Polygon makeDefaultClipWindow(){
+    private Polygon makeDefaultClipWindow() {
         Polygon w = new Polygon();
         int W = raster.getSirska();
         int H = raster.getVyska();
-        int cx = W/2; int cy = H/2;
-        int r = Math.min(W,H)/4;
-        for(int i=0;i<5;i++){
-            double ang = Math.toRadians(72*i - 90); // start up
-            int x = cx + (int)Math.round(r*Math.cos(ang));
-            int y = cy + (int)Math.round(r*Math.sin(ang));
-            w.addVertex(new model.Point(x,y));
+        int cx = W / 2;
+        int cy = H / 2;
+        int r = Math.min(W, H) / 4;
+        for (int i = 0; i < 5; i++) {
+            double ang = Math.toRadians(72 * i - 90); // start up
+            int x = cx + (int) Math.round(r * Math.cos(ang));
+            int y = cy + (int) Math.round(r * Math.sin(ang));
+            w.addVertex(new model.Point(x, y));
         }
         return w;
     }

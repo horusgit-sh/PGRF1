@@ -4,7 +4,7 @@ import java.awt.*;
 
 /**
  * Implementace rasterizace úsečky pomocí Bresenhamova algoritmu.
- *
+ * <p>
  * Algoritmus: Bresenhamův algoritmus pro rasterizaci úseček
  * Princip: Používá pouze celočíselnou aritmetiku pro výpočet pixel
  * Paměťová složitost: O(1)
