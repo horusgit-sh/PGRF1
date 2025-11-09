@@ -31,7 +31,7 @@ public class FilledLineRasterizer extends LineRasterizer {
         int y = y1;
 
         while (true) {
-            // Vykresli pixel
+            // vykresleni jednoho pixelu podle Bresenhamova kroku
             raster.setPixel(x, y, color.getRGB());
 
             if (x == x2 && y == y2) {

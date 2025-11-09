@@ -14,7 +14,6 @@ public class BoardPattern implements PatternFill {
 
     @Override
     public int getPixelColor(int x, int y) {
-        // если сумма индекса клеток чётная → цвет1, иначе цвет2
         int cx = x / cellSize;
         int cy = y / cellSize;
         return ((cx + cy) % 2 == 0) ? color1 : color2;

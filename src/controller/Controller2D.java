@@ -60,11 +60,11 @@ public class Controller2D {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                // If we are in clip mode: click triggers clipping of all finished polygons by the blue pentagon
+                // v rezimu orezani: klik provede orezani vsech hotovych polygonu modrym petiuhelnikem
                 if (clipMode) {
                     int cx = e.getX(), cy = e.getY();
                     model.Point clickP = new model.Point(cx, cy);
-                    // proceed only if click lies inside the pentagon
+                    // pokracujeme jen kdyz klik lezi uvnitr petiuhelniku
                     if (clipWindow != null && clipper.isPointInside(clickP, clipWindow)) {
                         java.util.List<Polygon> clippedList = new java.util.ArrayList<>();
                         for (Polygon fp : finishedPolys) {
@@ -75,7 +75,7 @@ public class Controller2D {
                         }
                         finishedPolys.clear();
                         finishedPolys.addAll(clippedList);
-                        // clear, redraw results
+                        // vycistime raster a znovu vykreslime vysledky
                         raster.clear();
                         for (Polygon fp : finishedPolys) {
                             java.util.List<model.Point> vs = fp.getVertices();
@@ -86,7 +86,7 @@ public class Controller2D {
                             }
                         }
                         panel.repaint();
-                        // auto fill clipped result
+                        // automaticke vyplneni vysledneho polygonu
                         if (!finishedPolys.isEmpty()) {
                             if (boardMode) {
                                 scanLineFiller.fill(finishedPolys.get(0), raster, board);
@@ -97,12 +97,12 @@ public class Controller2D {
                                 panel.repaint();
                             }
                         }
-                        // exit clip mode and hide window
+                        // ukonceni rezimu orezani a skryti petiuhelniku
                         clipMode = false;
                         clipWindow = null;
                         return;
                     }
-                    // if clicked outside pentagon, ignore for clipping
+                    // klik mimo petiuhelnik ignorujeme
                 }
 
                 if (seedBG || seedBND) {
@@ -244,9 +244,9 @@ public class Controller2D {
                     seedBND = false;
                     rectMode = false;
                     clipMode = true;
-                    // build centered blue pentagon as clipping window
+                    // vytvorime stredovy modry petiuhelnik jako orezavaci okno
                     clipWindow = makeDefaultClipWindow();
-                    // draw it in blue
+                    // vykreslime okno modrou barvou
                     Color __old = lineDrawer.getColor();
                     lineDrawer.setColor(new Color(0xFF0000FF, true));
                     java.util.List<model.Point> pts = clipWindow.getVertices();
@@ -266,9 +266,10 @@ public class Controller2D {
                     panel.repaint();
                 }
 
-                // Uzavre polygon mezernikem
+                // uzavreni polygonu klavesou SPACE
                 if (e.getKeyCode() == KeyEvent.VK_SPACE) {
                     polygonManager.closePolygon(gradientMode);
+                    // ulozime prave dokonceny polygon mezi hotove
                     Polygon saved = new Polygon();
                     for (Point p : currentPoly) saved.addVertex(p);
                     finishedPolys.add(saved);
@@ -277,21 +278,21 @@ public class Controller2D {
                     drawing = false;
                 }
 
-                // enable boundary fill
+                // zapnout vyplneni hranice (seed boundary)
                 if (e.getKeyCode() == KeyEvent.VK_B) {
                     seedBG = false;
                     seedBND = true;
                     drawing = false;
                     boardMode = false;
                 }
-                // enable background fill
+                // zapnout vyplneni pozadi (seed background)
                 if (e.getKeyCode() == KeyEvent.VK_F) {
                     seedBG = true;
                     seedBND = false;
                     drawing = false;
                     boardMode = false;
                 }
-                // enable rectangle mode
+                // zapnout rezim kresleni obdelniku (3 body)
                 if (e.getKeyCode() == KeyEvent.VK_R) {
                     drawing = false;
                     seedBG = false;

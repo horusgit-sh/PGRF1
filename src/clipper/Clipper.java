@@ -17,18 +17,23 @@ public class Clipper {
         }
 
         List<Point> out = new ArrayList<>(subject.getVertices());
+        // 'out' je aktualni seznam vrcholu pri prubeznem orezavani
 
+        // Iterujeme vsechny hrany orezavaciho polygonu
         for (int i = 0; i < clipWindow.size(); i++) {
             Point A = clipWindow.get(i);
             Point B = clipWindow.get((i + 1) % clipWindow.size());
 
+            // novy vysledek po orezani jedne hrany
             List<Point> newOut = new ArrayList<>();
             Point S = out.get(out.size() - 1);
 
             for (Point P : out) {
+                // test zda bod lezi uvnitr
                 boolean sIn = inside(S, A, B);
                 boolean pIn = inside(P, A, B);
 
+                // 4 pripady podle Sutherland-Hodgman tabulky
                 if (pIn) {
                     if (!sIn) newOut.add(intersect(S, P, A, B));
                     newOut.add(P);
@@ -48,6 +53,7 @@ public class Clipper {
         return result;
     }
 
+    // inside test pomocí orientace (cross product)
     private boolean inside(Point P, Point A, Point B) {
         return ((B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)) >= 0;
     }

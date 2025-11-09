@@ -10,7 +10,7 @@ public class ScanLineFiller {
 
     public void fill(Polygon poly, Raster raster, int color) {
 
-        // 1) найдём minY и maxY
+        // vyhledani rozsahu Y polygonu
         int minY = Integer.MAX_VALUE;
         int maxY = Integer.MIN_VALUE;
 
@@ -19,28 +19,23 @@ public class ScanLineFiller {
             if (p.getY() > maxY) maxY = p.getY();
         }
 
-        // 2) идём по горизонтальным линиям
+        // projdeme vsechny scan-line radky
         for (int y = minY; y <= maxY; y++) {
 
-            // массив временных пересечений
-            // (простой, без отдельных классов Edge)
+            // pole pro X pruseciky se scan-line
             int[] xs = new int[poly.getVertices().size()];
             int count = 0;
 
-            // 3) ищем пересечения линии y со всеми рёбрами полигона
             for (int i = 0; i < poly.getVertices().size(); i++) {
 
                 Point p1 = poly.getVertices().get(i);
                 Point p2 = poly.getVertices().get((i + 1) % poly.getVertices().size());
 
-                // пропуск горизонтальных рёбер
                 if (p1.getY() == p2.getY()) continue;
 
-                // проверяем попадание
                 if ((y >= Math.min(p1.getY(), p2.getY())) &&
                         (y < Math.max(p1.getY(), p2.getY()))) {
 
-                    // вычисление X пересечения
                     float t = (float) (y - p1.getY()) / (float) (p2.getY() - p1.getY());
                     int x = (int) (p1.getX() + t * (p2.getX() - p1.getX()));
 
@@ -48,10 +43,10 @@ public class ScanLineFiller {
                 }
             }
 
-            // 4) сортируем найденные X
+            // seradime pruseciky podle X
             Arrays.sort(xs, 0, count);
 
-            // 5) красим попарно
+            // vyplnujeme useky mezi dvojicemi pruseciku
             for (int i = 0; i < count; i += 2) {
 
                 int xStart = xs[i];
@@ -67,6 +62,7 @@ public class ScanLineFiller {
 
     public void fill(Polygon poly, Raster raster, PatternFill pattern) {
 
+        // vyhledani rozsahu Y polygonu (varianta s patternem)
         int minY = Integer.MAX_VALUE;
         int maxY = Integer.MIN_VALUE;
 
@@ -75,6 +71,7 @@ public class ScanLineFiller {
             if (p.getY() > maxY) maxY = p.getY();
         }
 
+        // projdeme vsechny scan-line radky
         for (int y = minY; y <= maxY; y++) {
 
             int[] xs = new int[poly.size()];
@@ -95,8 +92,10 @@ public class ScanLineFiller {
                 }
             }
 
+            // seradime pruseciky podle X
             Arrays.sort(xs, 0, count);
 
+            // vyplnujeme useky mezi dvojicemi pruseciku (patternem)
             for (int i = 0; i < count; i += 2) {
                 int xStart = xs[i];
                 int xEnd = xs[i + 1];
