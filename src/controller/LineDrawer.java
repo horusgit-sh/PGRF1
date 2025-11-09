@@ -15,6 +15,8 @@ public class LineDrawer {
     // Koncova barva pro gradient
     private final int color2 = Color.BLUE.getRGB();
 
+    private Color color = Color.RED;
+
     // Konstruktor - prijima rasterizator usecek
     public LineDrawer(LineRasterizer lineRasterizer) {
         this.lineRasterizer = lineRasterizer;
@@ -26,10 +28,10 @@ public class LineDrawer {
             if (gradientMode) {
                 raster.rasterizeWithGradient(x1, y1, color1, x2, y2, color2);
             } else {
-                raster.rasterize(x1, y1, x2, y2);
+                raster.rasterize(x1, y1, x2, y2, color);
             }
         } else {
-            lineRasterizer.rasterize(x1, y1, x2, y2);
+            lineRasterizer.rasterize(x1, y1, x2, y2, color);
         }
     }
 
@@ -71,5 +73,15 @@ public class LineDrawer {
         }
 
         return new int[]{newX, newY};
+    }
+
+
+
+    public void setColor(Color color) {
+        this.color = color;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

@@ -1,6 +1,8 @@
 package rasterize;
 
 
+import java.awt.*;
+
 public abstract class LineRasterizer {
     protected RasterBufferedImage raster;
 
@@ -9,6 +11,6 @@ public abstract class LineRasterizer {
     }
 
 
-    public abstract void rasterize(int x1, int y1, int x2, int y2);
-    public void rasterizeWithGradient(int x1, int y1, int color1, int x2, int y2, int color2) {}
+    public abstract void rasterize(int x1, int y1, int x2, int y2, Color color);
+    public void rasterizeWithGradient(int x1, int y1, int color1, int x2, int y2, int color2){}
 }

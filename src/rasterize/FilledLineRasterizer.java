@@ -18,7 +18,7 @@ public class FilledLineRasterizer extends LineRasterizer {
     }
 
     @Override
-    public void rasterize(int x1, int y1, int x2, int y2) {
+    public void rasterize(int x1, int y1, int x2, int y2, Color color) {
         int dx = Math.abs(x2 - x1);
         int dy = Math.abs(y2 - y1);
 
@@ -32,7 +32,7 @@ public class FilledLineRasterizer extends LineRasterizer {
 
         while (true) {
             // Vykresli pixel
-            raster.setPixel(x, y, 0xff0000);
+            raster.setPixel(x, y, color.getRGB());
 
             if (x == x2 && y == y2) {
                 break; //
@@ -115,4 +115,5 @@ public class FilledLineRasterizer extends LineRasterizer {
             }
         }
     }
+
 }

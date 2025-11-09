@@ -1,4 +1,3 @@
-// Controller2D - ovlada interakci uzivatele s platnem (mys, klavesnice)
 package controller;
 
 import model.Polygon;
@@ -58,10 +57,27 @@ public class Controller2D {
                         seedFiller.fill(x,y,raster,0x00FF00);
                         seedBG=false;
                     }
-                    if(seedBND) {
-                        seedFiller.fillBoundary(x, y, raster, 0xFFFFFF, 0xFF0000);
-                        seedBND=false;
-                    }
+                   if(seedBND) {
+                       final int BOUNDARY_COLOR = 0xFFFFFFFF;
+
+                       Color oldColor = lineDrawer.getColor();
+                       lineDrawer.setColor(new Color(0xFFFFFFFF, true));
+
+                       for(Polygon poly : finishedPolys){
+                           for(int i=0;i<poly.getVertices().size();i++){
+                               Point a=poly.getVertices().get(i);
+                               Point b=poly.getVertices().get((i+1)%poly.getVertices().size());
+                               lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                           }
+                       }
+
+                       lineDrawer.setColor(oldColor);
+
+                       seedFiller.fillBoundary(x, y, raster,0xFFFF0000, BOUNDARY_COLOR);
+                       seedBND=false;
+                       panel.repaint();
+                       return;
+                   }
                     panel.repaint();
                     return;
                 }
@@ -84,7 +100,8 @@ public class Controller2D {
                         Polygon r=new Polygon();
                         r.addVertex(rectA); r.addVertex(rectB); r.addVertex(p4); r.addVertex(p3p);
                         finishedPolys.add(r);
-                        rectMode=false; rectStep=0;
+                        rectMode=false;
+                        rectStep=0;
                         raster.clear();
                         for(Polygon fp:finishedPolys){
                             for(int i=0;i<fp.getVertices().size();i++){
