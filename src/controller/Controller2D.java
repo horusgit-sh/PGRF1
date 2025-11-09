@@ -35,6 +35,8 @@ public class Controller2D {
     private final java.util.List<Polygon> finishedPolys = new java.util.ArrayList<>();
     private boolean seedBG=false, seedBND=false;
     private final SeedFiller seedFiller = new SeedFiller();
+    private boolean clipMode = false;
+    private Polygon clipWindow = null;
 
     public Controller2D(Panel panel) {
         this.panel = panel;
@@ -50,6 +52,39 @@ public class Controller2D {
         panel.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                // If we are in clip mode: click triggers clipping of all finished polygons by the blue pentagon
+                if(clipMode){
+                    int cx = e.getX(), cy = e.getY();
+                    model.Point clickP = new model.Point(cx,cy);
+                    // proceed only if click lies inside the pentagon
+                    if(clipWindow!=null && clipper.isPointInside(clickP, clipWindow)){
+                        java.util.List<Polygon> clippedList = new java.util.ArrayList<>();
+                        for(Polygon fp : finishedPolys){
+                            Polygon cp = clipper.clip(fp, clipWindow);
+                            if(cp != null && cp.getVertices()!=null && cp.getVertices().size()>=3){
+                                clippedList.add(cp);
+                            }
+                        }
+                        finishedPolys.clear();
+                        finishedPolys.addAll(clippedList);
+                        // clear, redraw results
+                        raster.clear();
+                        for(Polygon fp: finishedPolys){
+                            java.util.List<model.Point> vs = fp.getVertices();
+                            for(int i=0;i<vs.size();i++){
+                                model.Point a = vs.get(i);
+                                model.Point b = vs.get((i+1)%vs.size());
+                                lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                            }
+                        }
+                        panel.repaint();
+                        // exit clip mode and hide window
+                        clipMode=false;
+                        clipWindow=null;
+                        return;
+                    }
+                    // if clicked outside pentagon, ignore for clipping
+                }
 
                 if(seedBG || seedBND){
                     int x=e.getX(), y=e.getY();
@@ -173,7 +208,21 @@ public class Controller2D {
             @Override
             public void keyPressed(KeyEvent e) {
                 if(e.getKeyCode()==KeyEvent.VK_V){
-                    drawing=false;
+                    drawing=false; seedBG=false; seedBND=false; rectMode=false;
+                    clipMode = true;
+                    // build centered blue pentagon as clipping window
+                    clipWindow = makeDefaultClipWindow();
+                    // draw it in blue
+                    Color __old = lineDrawer.getColor();
+                    lineDrawer.setColor(new Color(0xFF0000FF, true));
+                    java.util.List<model.Point> pts = clipWindow.getVertices();
+                    for(int i=0;i<pts.size();i++){
+                        model.Point a = pts.get(i);
+                        model.Point b = pts.get((i+1)%pts.size());
+                        lineDrawer.drawLine(a.x,a.y,b.x,b.y,false);
+                    }
+                    lineDrawer.setColor(__old);
+                    panel.repaint();
                     return;
                 }
                 if(e.getKeyCode()==KeyEvent.VK_C){
@@ -208,6 +257,21 @@ public class Controller2D {
             }
 
         });
+    }
+
+    private Polygon makeDefaultClipWindow(){
+        Polygon w = new Polygon();
+        int W = raster.getSirska();
+        int H = raster.getVyska();
+        int cx = W/2; int cy = H/2;
+        int r = Math.min(W,H)/4;
+        for(int i=0;i<5;i++){
+            double ang = Math.toRadians(72*i - 90); // start up
+            int x = cx + (int)Math.round(r*Math.cos(ang));
+            int y = cy + (int)Math.round(r*Math.sin(ang));
+            w.addVertex(new model.Point(x,y));
+        }
+        return w;
     }
 
 }

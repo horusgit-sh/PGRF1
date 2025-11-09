@@ -51,6 +51,19 @@ public class Clipper {
         return ((B.x - A.x) * (P.y - A.y) - (B.y - A.y) * (P.x - A.x)) >= 0;
     }
 
+    public boolean isPointInside(model.Point p, Polygon poly){
+        if(poly==null || poly.getVertices()==null || poly.getVertices().size()<3) return false;
+        boolean res=false;
+        java.util.List<model.Point> v = poly.getVertices();
+        for(int i=0,j=v.size()-1;i<v.size();j=i++){
+            int xi=v.get(i).x, yi=v.get(i).y;
+            int xj=v.get(j).x, yj=v.get(j).y;
+            boolean intersect = ((yi>p.y) != (yj>p.y)) && (p.x < (long)(xj - xi) * (p.y - yi) / (double)(yj - yi + (yj==yi?1:0)) + xi);
+            if(intersect) res = !res;
+        }
+        return res;
+    }
+
     private Point intersect(Point S, Point P, Point A, Point B) {
         double dx1 = P.x - S.x, dy1 = P.y - S.y;
         double dx2 = B.x - A.x, dy2 = B.y - A.y;
