@@ -1,4 +1,4 @@
-# Interaktivní kreslení linií a polygonů (PGRF1 – Úloha 2)
+# Interaktivní kreslení useček a polygonů (PGRF1 – Úloha 2)
 
 Jednoduchá Java aplikace pro kreslení čar a polygonů, vyplňování oblastí a ořezávání tvarů.
 
