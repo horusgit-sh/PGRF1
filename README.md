@@ -1,23 +1,31 @@
+# Interaktivní kreslení linií a polygonů (PGRF1 – Úloha 2)
 
-# Interaktivní kreslení úseček a polygonů
+Jednoduchá Java aplikace pro kreslení čar a polygonů, vyplňování oblastí a ořezávání tvarů.
 
-Tento projekt je úloha 1 z předmětu **PGRF1**. 
+## Funkce
+- Kreslení úseček myší (algoritmus Bresenham).
+- Tvorba polygonu z úseček, uzavření mezerníkem `SPACE`.
+- Mazání plátna klávesou `C`.
+- Vyplňování oblastí:
+  - `B` – vyplnění po hranici (boundary fill)
+  - `F` – vyplnění podle pozadí (flood fill)
+- Kreslení obdélníku ze 3 bodů (`R`).
+- Ořezání polygonů konvexním pětiúhelníkem (`V`).
+- Vyplnění výsledného polygonu:
+  - běžná barva (zelená)
+  - nebo šachovnicový vzor (`P`).
 
-## Funkce aplikace
-- Interaktivní zadávání bodů myší
-- Kreslení úseček (Bresenhamův algoritmus)
-- Režim **SHIFT** – zarovnání na vodorovnou, svislou nebo úhlopříčnou úsečku
-- Barevný přechod (gradient) mezi dvěma koncovými body
-- Uzavření polygonu klávesou **SPACE**
-- Vymazání plátna a dat klávesou **C**
+## Ovládání
+- Myš – kreslení čar.
+- `SPACE` – uzavře aktuální polygon.
+- `C` – smaže vše.
+- `R` – kreslení obdélníku.
+- `B` / `F` – vyplňování oblasti.
+- `V` – ořezání polygonů pětiúhelníkem.
+- `P` – aktivuje šachovnicové vyplnění.
 
-## Struktura projektu
-- `rasterize/` – práce s rastrem a rasterizace úseček
-- `model/` – ukládání a vykreslování polygonů
-- `controller/` – uživatelská interakce (myš a klávesnice)
-- `view/` – vykreslovací panel a okno aplikace
-
-## Spuštění
-Projekt lze spustit v prostředí **Java 17+**:
-1. Zkompilujte projekt
-2. Spusťte třídu `Main`
+## Algoritmy
+- Bresenham – rasterizace úseček
+- Flood/Boundary fill – vyplnění oblastí
+- Scan-line – vyplnění polygonů
+- Sutherland–Hodgman – ořezání polygonů
