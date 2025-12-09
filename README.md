@@ -1,46 +1,52 @@
 # 3D zobrazení scény (PGRF1)
 
-Java aplikace pro vykreslování 3D drátových modelů, křivek a ploch
-s podporou kamery a perspektivní projekce.
+Java aplikace pro vykreslování jednoduché 3D drátové grafické scény.
+Projekt je zaměřen na implementaci zobrazovacího řetězce, 3D transformací,
+kamerového systému, projekcí a parametrických křivek a ploch.
 
-Projekt nyní pracuje plně ve 3D prostoru a rozšiřuje předchozí 2D úlohy.
+Aplikace vychází ze struktury úloh modulu PGRF1 a rozšiřuje předchozí 2D řešení
+na plnohodnotné 3D zobrazení.
 
----
 
 ## Funkce aplikace
 
 ### 3D scéna
-Aplikace zobrazuje následující objekty:
+Scéna obsahuje několik drátových 3D objektů:
 - krychle
 - víceboký hranol (aproximace válce)
 - jehlan
-- parametrickou plochu – sedlovou plochu (hyperbolický paraboloid)
 - osy souřadnicového systému (X, Y, Z)
 
-### Transformace a zobrazení
-- modelové transformace (posunutí, rotace, změna měřítka)
+### Křivky a plochy
+- kubická Bézierova křivka
+- Fergusonova (Hermitova) kubická křivka
+- Coonsova kubická křivka
+- parametrická plocha – sedlová plocha (hyperbolický paraboloid)
+
+### Transformace a projekce
+- modelové transformace objektů (posunutí, rotace, změna měřítka)
 - pohledová transformace (kamera)
 - perspektivní projekce
-- dehomogenizace a viewportová transformace
-- zobrazení ve formě drátového modelu (wireframe)
-
-### Kamera a ovládání
-- rotace kamery pomocí myši
-- pohyb kamery pomocí kláves W, A, S, D
+- paralelní (ortografická) projekce
+- skládání transformací pomocí matic (Model · View · Projection)
+- dehomogenizace a převod do souřadnic okna
+- vykreslení ve formě drátového modelu (wireframe)
 
 ---
 
 ## Ovládání
-- myš – změna směru pohledu
-- W / A / S / D – pohyb kamery v prostoru
-- okno aplikace lze libovolně měnit velikost
+- myš – změna směru pohledu kamery
+- W / A / S / D – pohyb kamery (dopředu, dozadu, vlevo, vpravo)
+- P – přepnutí mezi perspektivní a paralelní projekcí
 
 ---
 
 ## Použité principy
-- maticové 3D transformace (Model · View · Projection)
 - homogenní souřadnice
-- dehomogenizace
-- perspektivní projekce
+- maticové 3D transformace
+- kamerový model
+- perspektivní a ortografická projekce
 - parametrické křivky a plochy
-- rasterizace úseček
+- rasterizace úseček pomocí index a vertex bufferů
+
+---
