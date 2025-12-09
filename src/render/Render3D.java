@@ -16,7 +16,7 @@ public class Render3D {
     private final LineRasterizer lineRasterizer;
     private final Raster raster;
 
-    // Transformační matice
+    // Transformacni matice
     private Mat4 viewMatrix;
     private Mat4 projMatrix;
 
@@ -60,7 +60,7 @@ public class Render3D {
                 Point3D t1 = transformation.multiply(p1);
                 Point3D t2 = transformation.multiply(p2);
 
-                // Jednodušší clipping
+                // Clipping
                 if (t1.w < 0.1 || t2.w < 0.1) {
                     continue;
                 }
