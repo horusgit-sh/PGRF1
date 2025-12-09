@@ -39,9 +39,7 @@ public class Controller3D {
         display();
     }
 
-    /**
-     * Inicializace objektu, kamery a rendereru.
-     */
+    //Inicializace objektu, kamery a rendereru.
     private void initObjects() {
         //Rasterizer
         LineRasterizer lineRasterizer = new FilledLineRasterizer(panel.getRaster());
@@ -73,27 +71,27 @@ public class Controller3D {
 
         // Cube
         Cube cube = new Cube();
-        cube.setModelMatrix(new Mat4Transl(-2, 0, 0));
+        cube.setModelMatrix(new Mat4Transl(2, 0, -2));
         cube.setColor(Color.MAGENTA);
         scene.add(cube);
 
         //Hranol
         Hranol hranol = new Hranol();
-        hranol.setModelMatrix(new Mat4Transl(1, 0, 2));
+        hranol.setModelMatrix(new Mat4Transl(-2, 0, 0));
         hranol.setColor(Color.ORANGE);
         scene.add(hranol);
 
         //Pyramid
         Pyramid pyramid = new Pyramid();
-        pyramid.setModelMatrix(new Mat4Transl(2, 0, 0));
+        pyramid.setModelMatrix(new Mat4Transl(2, 1, 2));
         pyramid.setColor(Color.YELLOW);
         scene.add(pyramid);
 
         //Krivka
-        Point3D p1 = new Point3D(3, 0, 0);
-        Point3D p2 = new Point3D(3, 3, 0);
-        Point3D p3 = new Point3D(-1, 3, 0);
-        Point3D p4 = new Point3D(-1, 0, 0);
+        Point3D p1 = new Point3D(-1, 0, -1);
+        Point3D p2 = new Point3D(-1, 3, -1);
+        Point3D p3 = new Point3D(-1, 3, 3);
+        Point3D p4 = new Point3D(-1, 0, 3);
         BezierCurve curve = new BezierCurve(p1, p2, p3, p4);
         scene.add(curve);
 

@@ -16,7 +16,7 @@ public class BezierCurve extends Solid {
      * P2, P3 = řídící body (určují tvar).
      */
     public BezierCurve(Point3D p1, Point3D p2, Point3D p3, Point3D p4) {
-        // Bézierova báze (matice) - pro splnění zadání "Definice kubik pomocí matic"
+        // Bezierova báze
         Mat4 basis = new Mat4(new double[][] {
                 {-1,  3, -3,  1},
                 { 3, -6,  3,  0},
@@ -24,7 +24,7 @@ public class BezierCurve extends Solid {
                 { 1,  0,  0,  0}
         });
 
-        // Počet segmentů (čím více, tím je křivka hladší)
+        // Pocet segmentu
         int detail = 30;
 
         for (int i = 0; i <= detail; i++) {

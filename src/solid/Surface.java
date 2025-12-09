@@ -21,10 +21,9 @@ public class Surface extends Solid {
                 double x = min + (max - min) * i / density;
                 double z = min + (max - min) * j / density;
 
-                // --- ZDE JE FUNKCE TVARU ---
-                // Funkce "Sombrero" nebo vlnobití: y = sin(x) * cos(z)
-                // Y používáme jako výšku.
-                double y = 0.5 * Math.sin(x * 2) * Math.cos(z * 2);
+                // Sedlová plocha (hyperbolický paraboloid): y = a * (x^2 - z^2)
+                double a = 0.1;
+                double y = a * (x * x - z * z);
 
                 vertexBuffer.add(new Point3D(x, y, z));
             }
@@ -44,6 +43,6 @@ public class Surface extends Solid {
             }
         }
 
-        this.color = Color.CYAN; // Barva mřížky
+        this.color = Color.WHITE;
     }
 }
