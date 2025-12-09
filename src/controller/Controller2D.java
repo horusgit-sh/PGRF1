@@ -320,7 +320,7 @@ public class Controller2D {
         int cy = H / 2;
         int r = Math.min(W, H) / 4;
         for (int i = 0; i < 5; i++) {
-            double ang = Math.toRadians(72 * i - 90); // start up
+            double ang = Math.toRadians(72 * i - 90);
             int x = cx + (int) Math.round(r * Math.cos(ang));
             int y = cy + (int) Math.round(r * Math.sin(ang));
             w.addVertex(new model.Point(x, y));
