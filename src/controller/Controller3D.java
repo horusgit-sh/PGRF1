@@ -8,7 +8,6 @@ import solid.*;
 import transforms.*;
 import view.Panel;
 
-import javax.sound.sampled.Line;
 import java.awt.Color;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -21,6 +20,10 @@ public class Controller3D {
 
     private Render3D render3D;
     private Camera camera;
+
+    private Mat4 perspProj;
+    private Mat4 orthoProj;
+    private boolean usePerspective = true;
 
     // Seznam objektu
     private final List<Solid> scene = new ArrayList<>();
@@ -55,8 +58,26 @@ public class Controller3D {
 
         // Projekce
         double aspect = (double) raster.getSirska() / raster.getVyska();
-        Mat4 pers = new Mat4PerspRH(Math.PI / 4, aspect, 0.1, 100.0);
-        render3D.setProjMatrix(pers);
+
+        // Perspektivní projekce
+        perspProj = new Mat4PerspRH(
+                Math.PI / 4,
+                aspect,
+                0.1,
+                100.0
+        );
+
+        // Paralelní (ortografická) projekce
+        orthoProj = new Mat4OrthoRH(
+                10 * aspect,   // w – šířka zobrazovacího objemu
+                10,            // h – výška zobrazovacího objemu
+                0.1,           // near
+                100.0,         // far
+                0, 0           // nepoužité parametry
+        );
+
+        // Výchozí projekce
+        render3D.setProjMatrix(perspProj);
 
 
         // Osy
@@ -169,6 +190,15 @@ public class Controller3D {
                                 .withPosition(new Vec3D(6, 4, 6))
                                 .withAzimuth(Math.toRadians(225))
                                 .withZenith(Math.toRadians(-25));
+                        break;
+                    // Přepnutí projekce (P)
+                    case KeyEvent.VK_P:
+                        usePerspective = !usePerspective;
+                        if (usePerspective) {
+                            render3D.setProjMatrix(perspProj);
+                        } else {
+                            render3D.setProjMatrix(orthoProj);
+                        }
                         break;
                 }
                 display();
