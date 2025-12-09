@@ -8,6 +8,7 @@ import solid.*;
 import transforms.*;
 import view.Panel;
 
+import javax.sound.sampled.Line;
 import java.awt.Color;
 import java.awt.event.*;
 import java.util.ArrayList;
@@ -87,13 +88,29 @@ public class Controller3D {
         pyramid.setColor(Color.YELLOW);
         scene.add(pyramid);
 
-        //Krivka
-        Point3D p1 = new Point3D(-1, 0, -1);
-        Point3D p2 = new Point3D(-1, 3, -1);
-        Point3D p3 = new Point3D(-1, 3, 3);
-        Point3D p4 = new Point3D(-1, 0, 3);
+        //Bezier Krivka
+        Point3D p1 = new Point3D(-3, 0, -2);
+        Point3D p2 = new Point3D(-4, 4,  2);
+        Point3D p3 = new Point3D(-2, 4,  4);
+        Point3D p4 = new Point3D(-3, 0, 6);
         BezierCurve curve = new BezierCurve(p1, p2, p3, p4);
         scene.add(curve);
+
+        // Fergusonova krivka
+        Point3D fp0 = new Point3D(1, 0, -1);
+        Point3D fp1 = new Point3D(1, 2, -1);
+        Point3D ft0 = new Point3D(0, 2, 1);
+        Point3D ft1 = new Point3D(0, -2, 1);
+        FergusonCurve ferguson = new FergusonCurve(fp0, fp1, ft0, ft1);
+        scene.add(ferguson);
+
+        // Coonsova krivka
+        Point3D cp0 = new Point3D(-1, 0, -2);
+        Point3D cp1 = new Point3D(-1, 4,  1);
+        Point3D cp2 = new Point3D(-1, 2,  4);
+        Point3D cp3 = new Point3D(-1, 0, 6);
+        CoonsovaCurve coons = new CoonsovaCurve(cp0, cp1, cp2, cp3);
+        scene.add(coons);
 
         // Parametricka plocha
         Surface surface = new Surface();
