@@ -1,31 +1,46 @@
-# Interaktivní kreslení useček a polygonů (PGRF1 – Úloha 2)
+# 3D zobrazení scény (PGRF1)
 
-Jednoduchá Java aplikace pro kreslení čar a polygonů, vyplňování oblastí a ořezávání tvarů.
+Java aplikace pro vykreslování 3D drátových modelů, křivek a ploch
+s podporou kamery a perspektivní projekce.
 
-## Funkce
-- Kreslení úseček myší (algoritmus Bresenham).
-- Tvorba polygonu z úseček, uzavření mezerníkem `SPACE`.
-- Mazání plátna klávesou `C`.
-- Vyplňování oblastí:
-  - `B` – vyplnění po hranici (boundary fill)
-  - `F` – vyplnění podle pozadí (flood fill)
-- Kreslení obdélníku ze 3 bodů (`R`).
-- Ořezání polygonů konvexním pětiúhelníkem (`V`).
-- Vyplnění výsledného polygonu:
-  - běžná barva (zelená)
-  - nebo šachovnicový vzor (`P`).
+Projekt nyní pracuje plně ve 3D prostoru a rozšiřuje předchozí 2D úlohy.
+
+---
+
+## Funkce aplikace
+
+### 3D scéna
+Aplikace zobrazuje následující objekty:
+- krychle
+- víceboký hranol (aproximace válce)
+- jehlan
+- parametrickou plochu – sedlovou plochu (hyperbolický paraboloid)
+- osy souřadnicového systému (X, Y, Z)
+
+### Transformace a zobrazení
+- modelové transformace (posunutí, rotace, změna měřítka)
+- pohledová transformace (kamera)
+- perspektivní projekce
+- dehomogenizace a viewportová transformace
+- zobrazení ve formě drátového modelu (wireframe)
+
+### Kamera a ovládání
+- rotace kamery pomocí myši
+- pohyb kamery pomocí kláves W, A, S, D
+
+---
 
 ## Ovládání
-- Myš – kreslení čar.
-- `SPACE` – uzavře aktuální polygon.
-- `C` – smaže vše.
-- `R` – kreslení obdélníku.
-- `B` / `F` – vyplňování oblasti.
-- `V` – ořezání polygonů pětiúhelníkem.
-- `P` – aktivuje šachovnicové vyplnění.
+- myš – změna směru pohledu
+- W / A / S / D – pohyb kamery v prostoru
+- okno aplikace lze libovolně měnit velikost
 
-## Algoritmy
-- Bresenham – rasterizace úseček
-- Flood/Boundary fill – vyplnění oblastí
-- Scan-line – vyplnění polygonů
-- Sutherland–Hodgman – ořezání polygonů
+---
+
+## Použité principy
+- maticové 3D transformace (Model · View · Projection)
+- homogenní souřadnice
+- dehomogenizace
+- perspektivní projekce
+- parametrické křivky a plochy
+- rasterizace úseček
