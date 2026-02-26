@@ -1,5 +1,5 @@
-import controller.Controller3D;
 import view.Window;
+import controller.Controller3D;
 
 public class Main {
     public static void main(String[] args) {
