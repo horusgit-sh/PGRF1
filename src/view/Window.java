@@ -12,7 +12,7 @@ public class Window extends JFrame {
     // Vytvori okno s danym rozmerem a vlozi do nej panel
     public Window(int width, int heigth) {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setTitle("PGRF1 2024/2025");
+        setTitle("PGRF2 2025/2026");
         setVisible(true);
 
         panel = new Panel(width, heigth);

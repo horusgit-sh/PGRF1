@@ -2,12 +2,10 @@ package rasterize;
 
 public class ZBuffer {
     private final int width;
-    private final int height;
     private final double[] depth;
 
     public ZBuffer(int width, int height) {
         this.width = width;
-        this.height = height;
         this.depth = new double[width * height];
         clear();
     }
@@ -26,12 +24,5 @@ public class ZBuffer {
         depth[y * width + x] = value;
     }
 
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
-    }
 }
 

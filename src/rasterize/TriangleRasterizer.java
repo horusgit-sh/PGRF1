@@ -1,14 +1,15 @@
+
 package rasterize;
 
 import java.awt.Color;
 import java.awt.image.BufferedImage;
+
 import transforms.Vec3D;
 
 public class TriangleRasterizer {
     private final Raster raster;
     private final ZBuffer zBuffer;
     private Vec3D lightPos = new Vec3D(5, 5, 5);
-    private Color lightColor = Color.WHITE;
     private double ambientStrength = 0.2;
     private double diffuseStrength = 0.8;
 
@@ -21,9 +22,6 @@ public class TriangleRasterizer {
         this.lightPos = lightPos;
     }
 
-    public void setLightColor(Color lightColor) {
-        this.lightColor = lightColor;
-    }
 
     public void rasterize(int x1, int y1, double z1,
                           int x2, int y2, double z2,
@@ -45,83 +43,194 @@ public class TriangleRasterizer {
                   color, texture, false);
     }
 
+    /**
+     * Scanline triangle fill with:
+     * - ZBuffer test/write
+     * - Texture sampling (if texture != null)
+     * - Simple Lambert lighting (ambient + diffuse) using interpolated normals
+     *
+     * NOTE: UV/normal interpolation is linear in screen space (not perspective-correct).
+     */
     public void rasterize(int x1, int y1, double z1, double u1, double v1, Vec3D n1,
                           int x2, int y2, double z2, double u2, double v2, Vec3D n2,
                           int x3, int y3, double z3, double u3, double v3, Vec3D n3,
                           Color color, BufferedImage texture, boolean useLighting) {
-        int minX = Math.max(0, Math.min(x1, Math.min(x2, x3)));
-        int maxX = Math.min(raster.getSirska() - 1, Math.max(x1, Math.max(x2, x3)));
-        int minY = Math.max(0, Math.min(y1, Math.min(y2, y3)));
-        int maxY = Math.min(raster.getVyska() - 1, Math.max(y1, Math.max(y2, y3)));
 
-        double area = edge(x1, y1, x2, y2, x3, y3);
-        if (area == 0) {
-            return;
+        // Sort vertices by Y ascending (swap all attributes together)
+        if (y2 < y1) {
+            int tx = x1; x1 = x2; x2 = tx;
+            int ty = y1; y1 = y2; y2 = ty;
+            double tz = z1; z1 = z2; z2 = tz;
+            double tu = u1; u1 = u2; u2 = tu;
+            double tv = v1; v1 = v2; v2 = tv;
+            Vec3D tn = n1; n1 = n2; n2 = tn;
+        }
+        if (y3 < y1) {
+            int tx = x1; x1 = x3; x3 = tx;
+            int ty = y1; y1 = y3; y3 = ty;
+            double tz = z1; z1 = z3; z3 = tz;
+            double tu = u1; u1 = u3; u3 = tu;
+            double tv = v1; v1 = v3; v3 = tv;
+            Vec3D tn = n1; n1 = n3; n3 = tn;
+        }
+        if (y3 < y2) {
+            int tx = x2; x2 = x3; x3 = tx;
+            int ty = y2; y2 = y3; y3 = ty;
+            double tz = z2; z2 = z3; z3 = tz;
+            double tu = u2; u2 = u3; u3 = tu;
+            double tv = v2; v2 = v3; v3 = tv;
+            Vec3D tn = n2; n2 = n3; n3 = tn;
         }
 
-        for (int y = minY; y <= maxY; y++) {
-            for (int x = minX; x <= maxX; x++) {
-                double px = x + 0.5;
-                double py = y + 0.5;
+        // Degenerate triangle (all on one scanline)
+        if (y1 == y3) return;
 
-                double w1 = edge(x2, y2, x3, y3, px, py) / area;
-                double w2 = edge(x3, y3, x1, y1, px, py) / area;
-                double w3 = 1.0 - w1 - w2;
+        int height = raster.getVyska();
+        int width = raster.getSirska();
 
-                if ((w1 >= 0 && w2 >= 0 && w3 >= 0) || (w1 <= 0 && w2 <= 0 && w3 <= 0)) {
-                    double z = w1 * z1 + w2 * z2 + w3 * z3;
-                    if (z < 0 || z > 1) {
-                        continue;
-                    }
-                    if (z < zBuffer.getDepth(x, y)) {
-                        zBuffer.setDepth(x, y, z);
+        // Scanline loop
+        for (int y = y1; y <= y3; y++) {
 
-                        int baseColor;
-                        if (texture != null) {
-                            double u = w1 * u1 + w2 * u2 + w3 * u3;
-                            double v = w1 * v1 + w2 * v2 + w3 * v3;
-                            int tx = (int) (u * texture.getWidth()) % texture.getWidth();
-                            int ty = (int) (v * texture.getHeight()) % texture.getHeight();
-                            if (tx < 0) tx += texture.getWidth();
-                            if (ty < 0) ty += texture.getHeight();
-                            baseColor = texture.getRGB(tx, ty);
-                        } else {
-                            baseColor = color.getRGB();
-                        }
+            if (y < 0 || y >= height) continue;
 
-                        int finalColor = baseColor;
-                        if (useLighting && n1 != null && n2 != null && n3 != null) {
-                            Vec3D normal = new Vec3D(
-                                w1 * n1.x + w2 * n2.x + w3 * n3.x,
-                                w1 * n1.y + w2 * n2.y + w3 * n3.y,
-                                w1 * n1.z + w2 * n2.z + w3 * n3.z
-                            ).normalized();
+            boolean secondHalf = (y > y2) || (y2 == y1);
+            int segmentHeight = secondHalf ? (y3 - y2) : (y2 - y1);
+            if (segmentHeight == 0) continue;
 
-                            double ambient = ambientStrength;
-                            double diff = Math.max(0, normal.dot(lightPos.normalized()));
-                            double diffuse = diffuseStrength * diff;
+            double alpha = (double) (y - y1) / (double) (y3 - y1);
+            double beta  = (double) (y - (secondHalf ? y2 : y1)) / (double) segmentHeight;
 
-                            double lighting = Math.min(1.0, ambient + diffuse);
+            // Point A on long edge (v1 -> v3)
+            double axd = x1 + (x3 - x1) * alpha;
+            double azd = z1 + (z3 - z1) * alpha;
+            double aud = u1 + (u3 - u1) * alpha;
+            double avd = v1 + (v3 - v1) * alpha;
 
-                            Color base = new Color(baseColor);
-                            int r = (int) (base.getRed() * lighting);
-                            int g = (int) (base.getGreen() * lighting);
-                            int b = (int) (base.getBlue() * lighting);
-                            finalColor = new Color(
-                                Math.min(255, r),
-                                Math.min(255, g),
-                                Math.min(255, b)
-                            ).getRGB();
-                        }
+            Vec3D and = null;
+            if (n1 != null && n3 != null) {
+                and = new Vec3D(
+                        n1.x + (n3.x - n1.x) * alpha,
+                        n1.y + (n3.y - n1.y) * alpha,
+                        n1.z + (n3.z - n1.z) * alpha
+                );
+            }
 
-                        raster.setPixel(x, y, finalColor);
-                    }
+            // Point B on short edge (v1 -> v2) or (v2 -> v3)
+            double bxd, bzd, bud, bvd;
+            Vec3D bnd = null;
+
+            if (!secondHalf) {
+                bxd = x1 + (x2 - x1) * beta;
+                bzd = z1 + (z2 - z1) * beta;
+                bud = u1 + (u2 - u1) * beta;
+                bvd = v1 + (v2 - v1) * beta;
+
+                if (n1 != null && n2 != null) {
+                    bnd = new Vec3D(
+                            n1.x + (n2.x - n1.x) * beta,
+                            n1.y + (n2.y - n1.y) * beta,
+                            n1.z + (n2.z - n1.z) * beta
+                    );
                 }
+            } else {
+                bxd = x2 + (x3 - x2) * beta;
+                bzd = z2 + (z3 - z2) * beta;
+                bud = u2 + (u3 - u2) * beta;
+                bvd = v2 + (v3 - v2) * beta;
+
+                if (n2 != null && n3 != null) {
+                    bnd = new Vec3D(
+                            n2.x + (n3.x - n2.x) * beta,
+                            n2.y + (n3.y - n2.y) * beta,
+                            n2.z + (n3.z - n2.z) * beta
+                    );
+                }
+            }
+
+            // Ensure left-to-right order
+            if (axd > bxd) {
+                double tmp;
+                tmp = axd; axd = bxd; bxd = tmp;
+                tmp = azd; azd = bzd; bzd = tmp;
+                tmp = aud; aud = bud; bud = tmp;
+                tmp = avd; avd = bvd; bvd = tmp;
+
+                Vec3D tn = and; and = bnd; bnd = tn;
+            }
+
+            int ax = (int) Math.ceil(axd);
+            int bx = (int) Math.floor(bxd);
+
+            if (bx < 0 || ax >= width) continue;
+            ax = Math.max(ax, 0);
+            bx = Math.min(bx, width - 1);
+
+            double dx = (bxd - axd);
+            if (dx == 0) dx = 1.0;
+
+            for (int x = ax; x <= bx; x++) {
+
+                double phi = (x - axd) / dx;
+
+                double z = azd + (bzd - azd) * phi;
+                if (z < 0 || z > 1) continue;
+
+                if (z >= zBuffer.getDepth(x, y)) continue;
+                zBuffer.setDepth(x, y, z);
+
+                // Base color (texture or solid)
+                int baseColor;
+                if (texture != null) {
+                    int tw = texture.getWidth();
+                    int th = texture.getHeight();
+
+                    double u = aud + (bud - aud) * phi;
+                    double v = avd + (bvd - avd) * phi;
+
+                    int tx = (int) (u * tw) % tw;
+                    int ty = (int) (v * th) % th;
+                    if (tx < 0) tx += tw;
+                    if (ty < 0) ty += th;
+
+                    baseColor = texture.getRGB(tx, ty);
+                } else {
+                    baseColor = color.getRGB();
+                }
+
+                int finalColor = baseColor;
+
+                // Lighting (ambient + diffuse) with interpolated normal
+                if (useLighting && and != null && bnd != null) {
+                    Vec3D normal = new Vec3D(
+                            and.x + (bnd.x - and.x) * phi,
+                            and.y + (bnd.y - and.y) * phi,
+                            and.z + (bnd.z - and.z) * phi
+                    ).normalized();
+
+                    double ambient = ambientStrength;
+
+                    // Simple directional light from lightPos
+                    Vec3D lightDir = lightPos.normalized();
+                    double diff = Math.max(0, normal.dot(lightDir));
+                    double diffuse = diffuseStrength * diff;
+
+                    double lighting = Math.min(1.0, ambient + diffuse);
+
+                    Color base = new Color(baseColor);
+                    int r = (int) (base.getRed() * lighting);
+                    int g = (int) (base.getGreen() * lighting);
+                    int b = (int) (base.getBlue() * lighting);
+
+                    finalColor = new Color(
+                            Math.min(255, r),
+                            Math.min(255, g),
+                            Math.min(255, b)
+                    ).getRGB();
+                }
+
+                raster.setPixel(x, y, finalColor);
             }
         }
     }
 
-    private static double edge(double ax, double ay, double bx, double by, double px, double py) {
-        return (px - ax) * (by - ay) - (py - ay) * (bx - ax);
-    }
 }

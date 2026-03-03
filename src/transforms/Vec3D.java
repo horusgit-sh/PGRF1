@@ -25,11 +25,9 @@ public class Vec3D {
         return new Vec3D(x + v.x, y + v.y, z + v.z);
     }
 
-    // --- TOTO TI CHYBĚLO (Odčítání vektorů) ---
     public Vec3D sub(Vec3D v) {
         return new Vec3D(x - v.x, y - v.y, z - v.z);
     }
-    // ------------------------------------------
 
     // Násobení skalárem (číslem)
     public Vec3D mul(double d) {
@@ -41,19 +39,19 @@ public class Vec3D {
         return Math.sqrt(x * x + y * y + z * z);
     }
 
-    // Normalizace (vytvoření jednotkového vektoru)
+    // Normalizace
     public Vec3D normalized() {
         double len = length();
         if (len == 0) return this;
         return new Vec3D(x / len, y / len, z / len);
     }
 
-    // Skalární součin (Dot Product)
+    // Skalární součin
     public double dot(Vec3D v) {
         return x * v.x + y * v.y + z * v.z;
     }
 
-    // Vektorový součin (Cross Product) - důležité pro normály a lookAt
+    // Vektorový součin
     public Vec3D cross(Vec3D v) {
         return new Vec3D(
                 y * v.z - z * v.y,

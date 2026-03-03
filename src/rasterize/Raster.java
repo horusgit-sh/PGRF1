@@ -9,5 +9,4 @@ public interface Raster {
 
     void clear();
 
-    int getPixel(int x, int y);
 }
